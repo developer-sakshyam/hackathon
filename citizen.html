@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Smart City — Citizen Notices</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #fff;
+        --muted: #6b7280;
+        --shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto;
+        background: var(--bg);
+        color: #0f172a;
+      }
+      header {
+        background: #0f172a;
+        color: #fff;
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header a {
+        color: #cbd5e1;
+        text-decoration: none;
+      }
+      .wrap {
+        max-width: 1000px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+      .card h2 {
+        margin: 0 0 10px;
+      }
+      .notice {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 10px;
+      }
+      .notice h4 {
+        margin: 0 0 6px;
+      }
+      .pill {
+        display: inline-block;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #1e40af;
+        margin-left: 8px;
+      }
+      .status {
+        font-size: 12px;
+        margin-left: 8px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #ecfeff;
+      }
+      .live {
+        background: #dcfce7;
+        color: #14532d;
+      }
+      .upcoming {
+        background: #fef9c3;
+        color: #7c2d12;
+      }
+      .past {
+        background: #f3f4f6;
+        color: #374151;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div><strong>Smart City</strong> — Citizen Notices</div>
+      <a href="login.html">Logout</a>
+    </header>
+
+    <div class="wrap">
+      <div class="grid">
+        <div class="card">
+          <h2>⚡ Electricity</h2>
+          <div id="list-electricity"></div>
+        </div>
+        <div class="card">
+          <h2>💧 Water</h2>
+          <div id="list-water"></div>
+        </div>
+        <div class="card">
+          <h2>🗑 Garbage</h2>
+          <div id="list-garbage"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const KEYS = {
+        electricity: "electricity_notices",
+        water: "water_notices",
+        garbage: "garbage_notices",
+      };
+
+      function esc(s) {
+        return (s || "").replace(
+          /[&<>"']/g,
+          (m) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            }[m])
+        );
+      }
+
+      function get(type) {
+        return JSON.parse(localStorage.getItem(KEYS[type]) || "[]");
+      }
+
+      function status(item, now = Date.now()) {
+        const end = item.start + item.duration * 3600 * 1000;
+        if (now >= item.start && now <= end) return "live";
+        if (now < item.start) return "upcoming";
+        return "past";
+      }
+
+      function renderType(type, mountId) {
+        const el = document.getElementById(mountId);
+        const items = get(type).sort((a, b) => b.createdAt - a.createdAt);
+        if (items.length === 0) {
+          el.innerHTML = `<p class="muted">No notices yet.</p>`;
+          return;
+        }
+        el.innerHTML = items
+          .map((n) => {
+            const end = n.start + n.duration * 3600 * 1000;
+            const st = status(n);
+            const label =
+              st === "live"
+                ? "Ongoing"
+                : st === "upcoming"
+                ? "Upcoming"
+                : "Past";
+            return `
+          <div class="notice">
+            <h4>${esc(n.ward)}
+              <span class="pill">${new Date(
+                n.start
+              ).toLocaleString()} → ${new Date(end).toLocaleString()}</span>
+              <span class="status ${st}">${label}</span>
+            </h4>
+            <div><b>Reason:</b> ${esc(n.reason)}</div>
+            <div><b>Duration:</b> ${n.duration} hour(s)</div>
+            ${n.notes ? `<div><b>Notes:</b> ${esc(n.notes)}</div>` : ``}
+            <div class="muted" style="margin-top:6px">Posted ${new Date(
+              n.createdAt
+            ).toLocaleString()}</div>
+          </div>
+        `;
+          })
+          .join("");
+      }
+
+      function renderAll() {
+        renderType("electricity", "list-electricity");
+        renderType("water", "list-water");
+        renderType("garbage", "list-garbage");
+      }
+
+      // live updates: re-render when admin updates/deletes
+      window.addEventListener("storage", (e) => {
+        if (
+          e.key === "notices_broadcast" ||
+          e.key === KEYS.electricity ||
+          e.key === KEYS.water ||
+          e.key === KEYS.garbage
+        ) {
+          renderAll();
+        }
+      });
+
+      // status rollover update every minute
+      setInterval(renderAll, 60_000);
+
+      renderAll();
+    </script>
+  </body>
+</html>

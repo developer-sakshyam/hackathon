@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Smart City — Admin Hub</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #fff;
+        --muted: #6b7280;
+        --accent: #2563eb;
+        --shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto;
+        background: var(--bg);
+        color: #0f172a;
+      }
+      header {
+        background: #0f172a;
+        color: #fff;
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header .right a {
+        color: #cbd5e1;
+        text-decoration: none;
+        margin-left: 12px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        min-height: calc(100vh - 56px);
+      }
+      .sidebar {
+        background: #111827;
+        color: #e5e7eb;
+        padding: 16px;
+      }
+      .side-title {
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .nav {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .nav button {
+        all: unset;
+        display: block;
+        background: #1f2937;
+        padding: 12px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+      .nav button.active {
+        background: #2563eb;
+      }
+      .nav button span {
+        margin-left: 6px;
+      }
+      .content {
+        padding: 22px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        max-width: 980px;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+      .card h2,
+      .card h3 {
+        margin: 0 0 10px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin: 10px 0 6px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        font: inherit;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-ghost {
+        background: #eef2ff;
+      }
+      .notice {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 12px;
+      }
+      .notice h4 {
+        margin: 0 0 6px;
+      }
+      .pill {
+        display: inline-block;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #1e40af;
+        margin-left: 8px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      @media (max-width: 720px) {
+        .row {
+          grid-template-columns: 1fr;
+        }
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div><strong>Smart City</strong> — Admin Hub</div>
+      <div class="right">
+        <a href="citizen.html">View Citizen Page</a>
+        <a href="admin-login.html">Logout</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-title">Manage Services</div>
+        <div class="nav">
+          <button
+            id="tab-electricity"
+            class="active"
+            onclick="switchTab('electricity')"
+          >
+            ⚡ <span>Electricity</span>
+          </button>
+          <button id="tab-water" onclick="switchTab('water')">
+            💧 <span>Water</span>
+          </button>
+          <button id="tab-garbage" onclick="switchTab('garbage')">
+            🗑 <span>Garbage</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="grid">
+          <!-- Form Card -->
+          <div class="card">
+            <h2 id="form-title">Create Electricity Notice</h2>
+            <p class="muted">
+              Fill the form and click <b>Upload</b>. Citizens see it
+              immediately.
+            </p>
+
+            <div class="row">
+              <div>
+                <label for="ward">Ward / Area / Street</label>
+                <input id="ward" placeholder="e.g., Ward 5 (Putalisadak)" />
+              </div>
+              <div>
+                <label for="start">Start Date & Time</label>
+                <input id="start" type="datetime-local" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="duration">Duration (hours)</label>
+                <input
+                  id="duration"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  placeholder="e.g., 2"
+                />
+              </div>
+              <div>
+                <label for="reason">Reason</label>
+                <input
+                  id="reason"
+                  placeholder="e.g., Line maintenance / Water rationing / Truck route"
+                />
+              </div>
+            </div>
+
+            <label for="notes">Optional Notes</label>
+            <textarea
+              id="notes"
+              rows="3"
+              placeholder="Any extra details (optional)"
+            ></textarea>
+
+            <div class="actions">
+              <button class="btn btn-primary" onclick="upload()">Upload</button>
+              <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+            </div>
+          </div>
+
+          <!-- List Card -->
+          <div class="card">
+            <h3 id="list-title">Recent Electricity Notices</h3>
+            <div id="list"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // ---- State / Keys ----
+      const STORE_KEYS = {
+        electricity: "electricity_notices",
+        water: "water_notices",
+        garbage: "garbage_notices",
+      };
+      let current = "electricity";
+
+      function uid() {
+        return Math.random().toString(36).slice(2) + Date.now().toString(36);
+      }
+      function esc(s) {
+        return (s || "").replace(
+          /[&<>"']/g,
+          (m) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            }[m])
+        );
+      }
+
+      // ---- Storage helpers ----
+      function getNotices(type) {
+        return JSON.parse(localStorage.getItem(STORE_KEYS[type]) || "[]");
+      }
+      function setNotices(type, arr) {
+        localStorage.setItem(STORE_KEYS[type], JSON.stringify(arr));
+        // broadcast to citizen page for live update
+        localStorage.setItem("notices_broadcast", Date.now().toString());
+      }
+
+      // ---- UI switch ----
+      function switchTab(type) {
+        current = type;
+        document
+          .getElementById("tab-electricity")
+          .classList.toggle("active", type === "electricity");
+        document
+          .getElementById("tab-water")
+          .classList.toggle("active", type === "water");
+        document
+          .getElementById("tab-garbage")
+          .classList.toggle("active", type === "garbage");
+
+        document.getElementById("form-title").innerText =
+          "Create " +
+          (type === "electricity"
+            ? "Electricity"
+            : type === "water"
+            ? "Water"
+            : "Garbage") +
+          " Notice";
+        document.getElementById("list-title").innerText =
+          "Recent " +
+          (type === "electricity"
+            ? "Electricity"
+            : type === "water"
+            ? "Water"
+            : "Garbage") +
+          " Notices";
+
+        clearForm();
+        renderList();
+      }
+
+      // ---- CRUD ----
+      function upload() {
+        const ward = document.getElementById("ward").value.trim();
+        const startStr = document.getElementById("start").value;
+        const duration = parseFloat(document.getElementById("duration").value);
+        const reason = document.getElementById("reason").value.trim();
+        const notes = document.getElementById("notes").value.trim();
+
+        if (!ward || !startStr || !reason || isNaN(duration) || duration < 0) {
+          alert(
+            "Please fill Ward, Start Date & Time, valid Duration, and Reason."
+          );
+          return;
+        }
+
+        const start = new Date(startStr).getTime();
+        const item = {
+          id: uid(),
+          type: current,
+          ward,
+          start,
+          duration,
+          reason,
+          notes,
+          createdAt: Date.now(),
+        };
+
+        const arr = getNotices(current);
+        arr.push(item);
+        setNotices(current, arr);
+        clearForm();
+        renderList();
+        alert("Notice uploaded.");
+      }
+
+      function deleteNotice(id) {
+        const arr = getNotices(current).filter((n) => n.id !== id);
+        setNotices(current, arr);
+        renderList();
+      }
+
+      // ---- Render ----
+      function renderList() {
+        const listEl = document.getElementById("list");
+        const items = getNotices(current).sort(
+          (a, b) => b.createdAt - a.createdAt
+        );
+        if (items.length === 0) {
+          listEl.innerHTML = `<p class="muted">No notices yet for this service.</p>`;
+          return;
+        }
+        listEl.innerHTML = items
+          .map((n) => {
+            const end = n.start + n.duration * 3600 * 1000;
+            return `
+          <div class="notice">
+            <h4>${esc(n.ward)}
+              <span class="pill">${new Date(
+                n.start
+              ).toLocaleString()} → ${new Date(end).toLocaleString()}</span>
+            </h4>
+            <div><b>Reason:</b> ${esc(n.reason)}</div>
+            <div><b>Duration:</b> ${n.duration} hour(s)</div>
+            ${n.notes ? `<div><b>Notes:</b> ${esc(n.notes)}</div>` : ``}
+            <div class="muted" style="margin-top:6px">Created ${new Date(
+              n.createdAt
+            ).toLocaleString()}</div>
+            <div class="actions">
+              <button class="btn" onclick="deleteNotice('${
+                n.id
+              }')">Delete</button>
+            </div>
+          </div>
+        `;
+          })
+          .join("");
+      }
+
+      function clearForm() {
+        document.getElementById("ward").value = "";
+        document.getElementById("start").value = "";
+        document.getElementById("duration").value = "";
+        document.getElementById("reason").value = "";
+        document.getElementById("notes").value = "";
+      }
+
+      // init
+      switchTab("electricity");
+    </script>
+  </body>
+</html>
